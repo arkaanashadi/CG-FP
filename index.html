@@ -1,9 +1,12 @@
+<!DOCTYPE html>
 <html>
     <head>
-        <title>1st Assignment</title>
-        <script src="https://cdn.babylonjs.com/babylon.js"></script>
-        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
-        <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+        <title>Computer Graphics Final Project</title>
+        <script src="js/babylonjs/babylon.js"></script>
+        <script src="js/babylonjs/babylonjs.loaders.min.js"></script>
+        <script src="js/babylonjs/babylon.objFileLoader.js"></script>
+        <script src="js/jquery/pep.js"></script>
+
         <style>
             html, body {
                 overflow: hidden;
@@ -21,47 +24,101 @@
     </head>
     <body>
         <canvas id="render" touch-action="none">
-        <script>
+        <script>        
             var canvas = document.getElementById("render");
             var engine = new BABYLON.Engine(canvas, true);
             var scene = new BABYLON.Scene(engine);
             var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 4, Math.PI / 4, 2000, new BABYLON.Vector3(0,0,-1500), scene);
+            // var camera = new BABYLON.FlyCamera("FlyCamera", new BABYLON.Vector3(0, 5, -10), scene);
+            camera.attachControl(canvas, true);
+
+
+            function controlObject(object) {
+                    scene.actionManager = new BABYLON.ActionManager(scene);
+                    scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
+                        if (evt.sourceEvent.key == "w") {
+                            object.__W_Pressed = true;
+                        }
+                        if (evt.sourceEvent.key == "s") {
+                            object.__S_Pressed = true;
+                        }
+                        if (evt.sourceEvent.key == "a") {
+                            object.__A_Pressed = true;
+                        }
+                        if (evt.sourceEvent.key == "d") {
+                            object.__D_Pressed = true;
+                        }
+                        if (evt.sourceEvent.key == "q") {
+                            object.__Q_Pressed = true;
+                        }
+                        if (evt.sourceEvent.key == "e") {
+                            object.__E_Pressed = true;
+                        }
+                    }));
+
+                    scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, (evt) => {
+                        if (evt.sourceEvent.key == "w") {
+                            object.__W_Pressed = false;
+                        }
+                        if (evt.sourceEvent.key == "s") {
+                            object.__S_Pressed = false;
+                        }
+                        if (evt.sourceEvent.key == "a") {
+                            object.__A_Pressed = false;
+                        }
+                        if (evt.sourceEvent.key == "d") {
+                            object.__D_Pressed = false;
+                        }
+                        if (evt.sourceEvent.key == "q") {
+                            object.__Q_Pressed = false;
+                        }
+                        if (evt.sourceEvent.key == "e") {
+                            object.__E_Pressed = false;
+                        }
+                    }));
+
+                    scene.registerBeforeRender(function(){
+                        if(!scene.isReady()) return;
+
+                        if(object){
+                            if(object.__W_Pressed)
+                                {
+                                    object.translate(BABYLON.Axis.Z, 0.1, BABYLON.Space.LOCAL);
+                                }
+                            if(object.__S_Pressed)
+                                {
+                                    object.translate(BABYLON.Axis.Z, -0.1, BABYLON.Space.LOCAL);
+                                }
+                            if(object.__A_Pressed) 
+                                {
+                                    object.translate(BABYLON.Axis.X, -0.1, BABYLON.Space.LOCAL);
+                                }
+                            if(object.__D_Pressed)
+                                {
+                                    object.translate(BABYLON.Axis.X, 0.1, BABYLON.Space.LOCAL);
+                                }
+                            if(object.__Q_Pressed)
+                                {
+                                    object.translate(BABYLON.Axis.Y, 0.1, BABYLON.Space.LOCAL);
+                                }
+                            if(object.__E_Pressed)
+                                {
+                                    object.translate(BABYLON.Axis.Y, -0.1, BABYLON.Space.LOCAL);
+                                }
+                        }
+                    });
+                }
 
             var createScene = function() {
-                
-                // BABYLON.SceneLoader.ImportMesh("", "asset/building/", "building.babylon", scene, function(mapMesh) {
-                // 	scene.meshes[0].scaling = new BABYLON.Vector3(0.001,0.001,0.001);
-                // });
 
-                var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 2}, scene);
-                sphere.position.x = 100;
-                sphere.position.z = 100;
-
-                BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_obj.obj", scene, function (droneMashes) {
-                    // for (var i = 0; i < count(scene.meshes); i++) {
-                    //     scene.meshes[i].position.z = 10;
-                    //     scene.meshes[i].position.x = 10;
-                    //     scene.meshes[i].position.y = 10;
-                    // }
-                    // camera.target = droneMashes[0];
+                BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_stl.stl", scene, function (droneMeshes) {
+                    console.log(droneMeshes);
+                    controlObject(droneMeshes[0]);
                 });
+        
 
-
-                // var lastMesh = count(scene.meshes);
-                // BABYLON.SceneLoader.Append("asset/Drone-Design/", "Drone_obj.obj", scene, function(droneMesh) {
-                    // scene.meshes[0].scaling = new BABYLON.Vector3(0.5,0.5,0.5);
-                    // for (var i = lastMesh + 1; i < count(scene.meshes); i++) {
-                    //     scene.meshes[i].position.z += 10;
-                    // }
-                // });
-                
-                
-                	// scene.meshes[0].scaling = new BABYLON.Vector3(45,45,45);
-                // var ship = scene.meshes[0]; myNewMaterial = new BABYLON.StandardMaterial("Mat", scene);myNewMaterial.diffuseTexture = new BABYLON.Texture("Scenes/test/", scene);   for(var i = 1; i < ship.length; i++) {}
                 scene.createDefaultCameraOrLight(true, true, true);
-
                 
-                    camera.attachControl(canvas, true);
                 return scene;
             }
 
