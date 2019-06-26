@@ -1,0 +1,78 @@
+<html>
+    <head>
+        <title>1st Assignment</title>
+        <script src="https://cdn.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+        <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            #render {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="render" touch-action="none">
+        <script>
+            var canvas = document.getElementById("render");
+            var engine = new BABYLON.Engine(canvas, true);
+            var scene = new BABYLON.Scene(engine);
+            var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 4, Math.PI / 4, 2000, new BABYLON.Vector3(0,0,-1500), scene);
+
+            var createScene = function() {
+                
+                // BABYLON.SceneLoader.ImportMesh("", "asset/building/", "building.babylon", scene, function(mapMesh) {
+                // 	scene.meshes[0].scaling = new BABYLON.Vector3(0.001,0.001,0.001);
+                // });
+
+                var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 2}, scene);
+                sphere.position.x = 100;
+                sphere.position.z = 100;
+
+                BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_obj.obj", scene, function (droneMashes) {
+                    // for (var i = 0; i < count(scene.meshes); i++) {
+                    //     scene.meshes[i].position.z = 10;
+                    //     scene.meshes[i].position.x = 10;
+                    //     scene.meshes[i].position.y = 10;
+                    // }
+                    // camera.target = droneMashes[0];
+                });
+
+
+                // var lastMesh = count(scene.meshes);
+                // BABYLON.SceneLoader.Append("asset/Drone-Design/", "Drone_obj.obj", scene, function(droneMesh) {
+                    // scene.meshes[0].scaling = new BABYLON.Vector3(0.5,0.5,0.5);
+                    // for (var i = lastMesh + 1; i < count(scene.meshes); i++) {
+                    //     scene.meshes[i].position.z += 10;
+                    // }
+                // });
+                
+                
+                	// scene.meshes[0].scaling = new BABYLON.Vector3(45,45,45);
+                // var ship = scene.meshes[0]; myNewMaterial = new BABYLON.StandardMaterial("Mat", scene);myNewMaterial.diffuseTexture = new BABYLON.Texture("Scenes/test/", scene);   for(var i = 1; i < ship.length; i++) {}
+                scene.createDefaultCameraOrLight(true, true, true);
+
+                
+                    camera.attachControl(canvas, true);
+                return scene;
+            }
+
+            var scene = createScene();
+            engine.runRenderLoop(function() {
+                // console.log(camera.position)
+                scene.render();
+            });
+      window.addEventListener("resize", function() {
+         engine.resize();
+      });
+        </script>
+    </body>
+</html>
