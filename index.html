@@ -28,12 +28,17 @@
             var canvas = document.getElementById("render");
             var engine = new BABYLON.Engine(canvas, true);
             var scene = new BABYLON.Scene(engine);
-            var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 4, Math.PI / 4, 2000, new BABYLON.Vector3(0,0,-1500), scene);
+            // var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 4, Math.PI / 4, 2000, new BABYLON.Vector3(0,0,-1500), scene);
+            var map = ["asset/building/", "building.babylon"];
+            var camera = new BABYLON.FollowCamera("DroneCam", new BABYLON.Vector3(0, 10, -10), scene);
+
             // var camera = new BABYLON.FlyCamera("FlyCamera", new BABYLON.Vector3(0, 5, -10), scene);
-            camera.attachControl(canvas, true);
+            
 
 
             function controlObject(object) {
+
+                // Checks for key inputs
                     scene.actionManager = new BABYLON.ActionManager(scene);
                     scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
                         if (evt.sourceEvent.key == "w") {
@@ -77,6 +82,7 @@
                         }
                     }));
 
+                // Moves the object
                     scene.registerBeforeRender(function(){
                         if(!scene.isReady()) return;
 
@@ -110,21 +116,36 @@
                 }
 
             var createScene = function() {
+                var box = BABYLON.MeshBuilder.CreateBox("mark", {size: 1}, scene);
 
-                BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_stl.stl", scene, function (droneMeshes) {
-                    console.log(droneMeshes);
-                    controlObject(droneMeshes[0]);
+                BABYLON.SceneLoader.ImportMesh("", "asset/building/", "building.babylon", scene, function(mapMesh) {
+                    scene.meshes[0].scaling = new BABYLON.Vector3(0.001,0.001,0.001);
                 });
-        
+
+                console.log(camera);
+                BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_stl.stl", scene, function (droneMeshes) {
+                    controlObject(droneMeshes[0]);
+                    drone = droneMeshes[0];
+                    camera.target = drone;
+                    camera.lockedTarget = drone;
+                    scene.activeCamera = camera;
+                    // console.log(drone);
+                });
+
+                
+                
+                // camera.attachControl(canvas, true);
+                
 
                 scene.createDefaultCameraOrLight(true, true, true);
                 
                 return scene;
             }
 
+            // console.log(scene.activeCamera);
+
             var scene = createScene();
             engine.runRenderLoop(function() {
-                // console.log(camera.position)
                 scene.render();
             });
       window.addEventListener("resize", function() {

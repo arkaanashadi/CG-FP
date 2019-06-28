@@ -27,113 +27,142 @@
             var scene = new BABYLON.Scene(engine);
             // var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 4, Math.PI / 4, 2000, new BABYLON.Vector3(0,0,-1500), scene);
 
-            var createScene = function() {
+            function controlObject(object) {
+
+                // Checks for key inputs
+                    scene.actionManager = new BABYLON.ActionManager(scene);
+                    scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
+                        if (evt.sourceEvent.key == "w") {
+                            object.__W_Pressed = true;
+                        }
+                        if (evt.sourceEvent.key == "s") {
+                            object.__S_Pressed = true;
+                        }
+                        if (evt.sourceEvent.key == "a") {
+                            object.__A_Pressed = true;
+                        }
+                        if (evt.sourceEvent.key == "d") {
+                            object.__D_Pressed = true;
+                        }
+                        if (evt.sourceEvent.key == "q") {
+                            object.__Q_Pressed = true;
+                        }
+                        if (evt.sourceEvent.key == "e") {
+                            object.__E_Pressed = true;
+                        }
+                    }));
+
+                    scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, (evt) => {
+                        if (evt.sourceEvent.key == "w") {
+                            object.__W_Pressed = false;
+                        }
+                        if (evt.sourceEvent.key == "s") {
+                            object.__S_Pressed = false;
+                        }
+                        if (evt.sourceEvent.key == "a") {
+                            object.__A_Pressed = false;
+                        }
+                        if (evt.sourceEvent.key == "d") {
+                            object.__D_Pressed = false;
+                        }
+                        if (evt.sourceEvent.key == "q") {
+                            object.__Q_Pressed = false;
+                        }
+                        if (evt.sourceEvent.key == "e") {
+                            object.__E_Pressed = false;
+                        }
+                    }));
+
+                // Moves the object
+                    scene.registerBeforeRender(function(){
+                        if(!scene.isReady()) return;
+
+                        if(object){
+                            if(object.__W_Pressed)
+                                {
+                                    object.translate(BABYLON.Axis.Z, 0.1, BABYLON.Space.LOCAL);
+                                }
+                            if(object.__S_Pressed)
+                                {
+                                    object.translate(BABYLON.Axis.Z, -0.1, BABYLON.Space.LOCAL);
+                                }
+                            if(object.__A_Pressed) 
+                                {
+                                    object.translate(BABYLON.Axis.X, -0.1, BABYLON.Space.LOCAL);
+                                }
+                            if(object.__D_Pressed)
+                                {
+                                    object.translate(BABYLON.Axis.X, 0.1, BABYLON.Space.LOCAL);
+                                }
+                            if(object.__Q_Pressed)
+                                {
+                                    object.translate(BABYLON.Axis.Y, 0.1, BABYLON.Space.LOCAL);
+                                }
+                            if(object.__E_Pressed)
+                                {
+                                    object.translate(BABYLON.Axis.Y, -0.1, BABYLON.Space.LOCAL);
+                                }
+                        }
+                    });
+                }
+
+            var createScene = function () {
+                // This creates a basic Babylon Scene object (non-mesh)
                 var scene = new BABYLON.Scene(engine);
 
-                var env = BABYLON.Mesh.CreateBox("env", 7.0, scene);
+                /********** FOLLOW CAMERA EXAMPLE **************************/
 
-                var target = BABYLON.MeshBuilder.CreateBox("target", {height: 2, width:2, depth:2}, scene);
-                console.log(target)
-                // var target = BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_stl.stl", scene, function (droneMashes){});
-                // var target = []
+                // This creates and initially positions a follow camera     
+                // var camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(0, 10, -10), scene);
 
-                var camera = new BABYLON.FreeCamera("Camera",target.position.clone(),scene);
-                console.log(target)
+                var camera = new BABYLON.UniversalCamera("UniversalCamera", new BABYLON.Vector3(0, 0, -10), scene);
 
-                camera.attachControl(canvas, true);
+                
+                // This attaches the camera to the canvas
+                // camera.attachControl(canvas, true);
+                
+                /**************************************************************/
 
-                scene.actionManager = new BABYLON.ActionManager(scene);
-                scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
-                    if (evt.sourceEvent.key == "w") {
-                        target.__W_Pressed = true;
-                    }
-                    if (evt.sourceEvent.key == "s") {
-                        target.__S_Pressed = true;
-                    }
-                    if (evt.sourceEvent.key == "a") {
-                        target.__A_Pressed = true;
-                    }
-                    if (evt.sourceEvent.key == "d") {
-                        target.__D_Pressed = true;
-                    }
-                    if (evt.sourceEvent.key == "q") {
-                        target.__Q_Pressed = true;
-                    }
-                    if (evt.sourceEvent.key == "e") {
-                        target.__E_Pressed = true;
-                    }
-                }));
+                // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+                var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+                
+                //Material
+                var mat = new BABYLON.StandardMaterial("mat1", scene);
+                mat.alpha = 1.0;
+                mat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 1.0);
+                var texture = new BABYLON.Texture("http://jerome.bousquie.fr/BJS/images/spriteAtlas.png", scene);
+                mat.diffuseTexture = texture;
+                
+                //Different face for each side of box to show camera rotation
+                var hSpriteNb =  6;  // 6 sprites per row
+                var vSpriteNb =  4;  // 4 sprite rows   
+                
+                var faceUV = new Array(6);
 
-                scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, (evt) => {
-                    if (evt.sourceEvent.key == "w") {
-                        target.__W_Pressed = false;
-                    }
-                    if (evt.sourceEvent.key == "s") {
-                        target.__S_Pressed = false;
-                    }
-                    if (evt.sourceEvent.key == "a") {
-                        target.__A_Pressed = false;
-                    }
-                    if (evt.sourceEvent.key == "d") {
-                        target.__D_Pressed = false;
-                    }
-                    if (evt.sourceEvent.key == "q") {
-                        target.__Q_Pressed = false;
-                    }
-                    if (evt.sourceEvent.key == "e") {
-                        target.__E_Pressed = false;
-                    }
-                }));
+                for (var i = 0; i < 6; i++) {
+                    faceUV[i] = new BABYLON.Vector4(i/hSpriteNb, 0, (i+1)/hSpriteNb, 1 / vSpriteNb);
+                }
+                
+                var box = BABYLON.MeshBuilder.CreateBox("mark", {size: 2}, scene);
 
-                scene.registerBeforeRender(function(){
-                    if(!scene.isReady()) return;
-
-                    if(target){
-                        if(target.__W_Pressed)
-                            {
-                                target.translate(BABYLON.Axis.Z, 0.1, BABYLON.Space.LOCAL);
-                            }
-                        if(target.__S_Pressed)
-                            {
-                                target.translate(BABYLON.Axis.Z, -0.1, BABYLON.Space.LOCAL);
-                            }
-                        if(target.__A_Pressed) 
-                            {
-                                target.translate(BABYLON.Axis.X, -0.1, BABYLON.Space.LOCAL);
-                            }
-                        if(target.__D_Pressed)
-                            {
-                                target.translate(BABYLON.Axis.X, 0.1, BABYLON.Space.LOCAL);
-                            }
-                        if(target.__Q_Pressed)
-                            {
-                                target.translate(BABYLON.Axis.Y, 0.1, BABYLON.Space.LOCAL);
-                            }
-                        if(target.__E_Pressed)
-                            {
-                                target.translate(BABYLON.Axis.Y, -0.1, BABYLON.Space.LOCAL);
-                            }
-                    }
-                });
-
-                scene.onBeforeRenderObservable.add(()=>{
-
-                    camera.position = target.position.clone();
-                    let ray = camera.getForwardRay();
-
-                    for(i = 0; i < target.length; i++){
-                        target[i].rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
-                    }
-                    
-
-                    camera.position = target.position.clone().add(ray.direction.multiplyByFloats(-10,-10,-10));
-                });
-
+                // Shape to follow
+                var box = BABYLON.MeshBuilder.CreateBox("box", {size: 2, faceUV: faceUV }, scene);
+                box.position = new BABYLON.Vector3(20, 0, 10);
+                box.material = mat;
+                
+                /*****************SET TARGET FOR CAMERA************************/ 
+                // camera.lockedTarget = box;
+                /**************************************************************/
+                
+                controlObject(box);
+                
                 return scene;
+
             };
 
             var scene = createScene();
             engine.runRenderLoop(function() {
+                // console.log(scene.activeCamera);
                 // console.log(camera.position)
                 scene.render();
             });
