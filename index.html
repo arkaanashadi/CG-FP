@@ -28,14 +28,11 @@
             var canvas = document.getElementById("render");
             var engine = new BABYLON.Engine(canvas, true);
             var scene = new BABYLON.Scene(engine);
-            // var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 4, Math.PI / 4, 2000, new BABYLON.Vector3(0,0,-1500), scene);
             var map = ["asset/building/", "building.babylon"];
-            var camera = new BABYLON.FollowCamera("DroneCam", new BABYLON.Vector3(0, 10, -10), scene);
+            var camera;
 
             // var camera = new BABYLON.FlyCamera("FlyCamera", new BABYLON.Vector3(0, 5, -10), scene);
             
-
-
             function controlObject(object) {
 
                 // Checks for key inputs
@@ -126,16 +123,20 @@
                 BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_stl.stl", scene, function (droneMeshes) {
                     controlObject(droneMeshes[0]);
                     drone = droneMeshes[0];
-                    camera.target = drone;
-                    camera.lockedTarget = drone;
+                    drone.position = new BABYLON.Vector3(0, 10, -10);
+                    camera = new BABYLON.FreeCamera("Camera",drone.position.clone(),scene);
+	                camera.attachControl(canvas, true);
                     scene.activeCamera = camera;
-                    // console.log(drone);
-                });
+                    scene.onBeforeRenderObservable.add(()=>{
+                        camera.position = drone.position.clone();
+                        let ray = camera.getForwardRay();
 
-                
-                
-                // camera.attachControl(canvas, true);
-                
+                        drone.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
+
+                        camera.position = drone.position.clone().add(ray.direction.multiplyByFloats(-1.5,-1.5,-1.5));
+                    })
+                    // console.log(drone);
+                }); 
 
                 scene.createDefaultCameraOrLight(true, true, true);
                 
