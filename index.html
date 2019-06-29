@@ -30,12 +30,10 @@
             var scene = new BABYLON.Scene(engine);
             var map = ["asset/building/", "building.babylon"];
             var camera;
-
-            // var camera = new BABYLON.FlyCamera("FlyCamera", new BABYLON.Vector3(0, 5, -10), scene);
             
             function controlObject(object) {
 
-                // Checks for key inputs
+                // Checks for keyboard inputs (keyup)
                     scene.actionManager = new BABYLON.ActionManager(scene);
                     scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
                         if (evt.sourceEvent.key == "w") {
@@ -58,6 +56,7 @@
                         }
                     }));
 
+                    // Checks for keyboard inputs (keydown)
                     scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, (evt) => {
                         if (evt.sourceEvent.key == "w") {
                             object.__W_Pressed = false;
@@ -79,7 +78,7 @@
                         }
                     }));
 
-                // Moves the object
+                // Moves the object based on keyboard input
                     scene.registerBeforeRender(function(){
                         if(!scene.isReady()) return;
 
@@ -113,45 +112,57 @@
                 }
 
             var createScene = function() {
-                var box = BABYLON.MeshBuilder.CreateBox("mark", {size: 1}, scene);
 
+                // Mark the test object (some how this is important??? (causes problems if page is reloaded without Mark))
+                var box = BABYLON.MeshBuilder.CreateBox("Mark", {size: 1}, scene);
+
+                // Loads Map
                 BABYLON.SceneLoader.ImportMesh("", "asset/building/", "building.babylon", scene, function(mapMesh) {
                     scene.meshes[0].scaling = new BABYLON.Vector3(0.001,0.001,0.001);
                 });
 
-                console.log(camera);
+                // Loads Drone
                 BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_stl.stl", scene, function (droneMeshes) {
-                    controlObject(droneMeshes[0]);
                     drone = droneMeshes[0];
+
+                    // Sets keyboard controls to the drone
+                    controlObject(drone);
+                    
+                    // Sets drone initial position
                     drone.position = new BABYLON.Vector3(0, 10, -10);
-                    camera = new BABYLON.FreeCamera("Camera",drone.position.clone(),scene);
+
+                    // Sets camera as FreeCamera and sets it to the drone's position
+                    camera = new BABYLON.FreeCamera("Camera",drone.position.clone(), scene);
 	                camera.attachControl(canvas, true);
+
+                    // Sets camera as the active camera
                     scene.activeCamera = camera;
+
+                    // Sets the camera to the drone's position every time the scene is rendered
                     scene.onBeforeRenderObservable.add(()=>{
                         camera.position = drone.position.clone();
                         let ray = camera.getForwardRay();
 
                         drone.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
-
+                        
                         camera.position = drone.position.clone().add(ray.direction.multiplyByFloats(-1.5,-1.5,-1.5));
                     })
-                    // console.log(drone);
                 }); 
 
                 scene.createDefaultCameraOrLight(true, true, true);
                 
                 return scene;
             }
-
-            // console.log(scene.activeCamera);
-
+            
             var scene = createScene();
+
             engine.runRenderLoop(function() {
                 scene.render();
             });
-      window.addEventListener("resize", function() {
-         engine.resize();
-      });
+
+            window.addEventListener("resize", function() {
+                engine.resize();
+            });
         </script>
     </body>
 </html>
