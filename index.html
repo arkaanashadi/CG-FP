@@ -136,8 +136,7 @@
                 // Mark the test object (some how this is important??? (causes problems if page is reloaded without Mark))
                 var box = BABYLON.MeshBuilder.CreateBox("Mark", {size: 1}, scene);
 
-                var rotor1 = BABYLON.MeshBuilder.CreateBox("box", {height: 0.01, width:0.22, depth:.03}, scene);   
-                var rotor2 = BABYLON.MeshBuilder.CreateBox("box", {height: 0.01, width:0.22, depth:.03}, scene); 
+                 
 
                 // Loads Map
                 BABYLON.SceneLoader.ImportMesh("", "asset/building/", "building.babylon", scene, function(mapMesh) {
@@ -146,9 +145,37 @@
                 });
                 
                 // Loads Drone
-                BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_stl.stl", scene, function (droneMeshes) {
+                BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_obj.obj", scene, function (droneMeshes) {
                     drone = droneMeshes[0];
-                    
+
+                    // Sets the rotor and rotor frams meshes
+                    // Left rotor set
+                    var rotor_L_frame = scene.getMeshByName("Rotor_L_2_Cube.000");
+                    var rotor_L = scene.getMeshByName("Rotor_L_Cube.007");
+
+                    // Right Rotor set
+                    var rotor_R_frame = scene.getMeshByName("Rotor_R_2_Cube.013");
+                    var rotor_R = scene.getMeshByName("Rotor_R_Cube.012");
+
+                    // Sets the drone as the rotor's parent mesh
+                    rotor_L_frame.parent = drone;
+                    rotor_L.parent = drone;
+
+                    rotor_R_frame.parent = drone;
+                    rotor_R.parent = drone;
+
+                    // Loads the drone Material
+                    var droneMaterial = new BABYLON.StandardMaterial("droneMaterial", scene);
+                    droneMaterial.emissiveTexture = new BABYLON.Texture("asset/Drone-Design/textures/Flying drone_col.jpg", scene);
+
+                    // Sets the drone material to the drone mesh
+                    drone.material = droneMaterial;
+
+                    rotor_L.material = droneMaterial;
+                    rotor_L_frame.material = droneMaterial;
+                    rotor_R.material = droneMaterial;
+                    rotor_R_frame.material = droneMaterial;
+
                     drone.ellipsoid = new BABYLON.Vector3(0.2,0.07,0.4);
                     drone.checkCollisions = true;
 
@@ -157,11 +184,6 @@
                     
                     // Sets drone initial position
                     drone.position = new BABYLON.Vector3(0, 2, 0);
-
-                    rotor1.position.x += .25;
-                    rotor2.position.x -= .25;
-                    rotor1.parent = drone;  
-                    rotor2.parent = drone;
 
                     // Sets camera as FreeCamera and sets it to the drone's position
                     camera = new BABYLON.FreeCamera("Camera",drone.position.clone(), scene);
@@ -180,8 +202,14 @@
                         drone.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
                         objectTransform.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
                         
-                        rotor1.rotation.y += 2;
-                        rotor2.rotation.y -= 2;
+                        // Rotates left rotor
+                        rotor_L.setPivotMatrix(BABYLON.Matrix.Translation(-0.25, 0, 0));
+                        rotor_L.rotate(BABYLON.Axis.Y, Math.PI/4, BABYLON.Space.LOCAL);
+
+                        // Rotates right rotor
+                        rotor_R.setPivotMatrix(BABYLON.Matrix.Translation(0.25, 0, 0));
+                        rotor_R.rotate(BABYLON.Axis.Y, Math.PI/4, BABYLON.Space.LOCAL);
+
                         
                         camera.position = drone.position.clone().add(ray.direction.multiplyByFloats(-1.5,-3,-1.5));
                     })
