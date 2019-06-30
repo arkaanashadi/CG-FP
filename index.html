@@ -148,21 +148,8 @@
                 BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_obj.obj", scene, function (droneMeshes) {
                     drone = droneMeshes[0];
 
-                    // Sets the rotor and rotor frams meshes
-                    // Left rotor set
-                    var rotor_L_frame = scene.getMeshByName("Rotor_L_2_Cube.000");
-                    var rotor_L = scene.getMeshByName("Rotor_L_Cube.007");
-
-                    // Right Rotor set
-                    var rotor_R_frame = scene.getMeshByName("Rotor_R_2_Cube.013");
-                    var rotor_R = scene.getMeshByName("Rotor_R_Cube.012");
-
-                    // Sets the drone as the rotor's parent mesh
-                    rotor_L_frame.parent = drone;
-                    rotor_L.parent = drone;
-
-                    rotor_R_frame.parent = drone;
-                    rotor_R.parent = drone;
+                    // Sets drone initial position
+                    drone.position = new BABYLON.Vector3(0, 2, 0);
 
                     // Loads the drone Material
                     var droneMaterial = new BABYLON.StandardMaterial("droneMaterial", scene);
@@ -171,47 +158,66 @@
                     // Sets the drone material to the drone mesh
                     drone.material = droneMaterial;
 
+                    // Sets keyboard controls to the drone
+                    controlObject(drone);
+
+
+                    // Sets the rotor and rotor frames meshes
+                    // Left rotor set
+                    var rotor_L_frame = scene.getMeshByName("Rotor_L_2_Cube.000");
+                    var rotor_L = scene.getMeshByName("Rotor_L_Cube.007");
+
+                    // Right Rotor set
+                    var rotor_R_frame = scene.getMeshByName("Rotor_R_2_Cube.013");
+                    var rotor_R = scene.getMeshByName("Rotor_R_Cube.012");
+
+                    // Sets the pivot for rotation of both rotors
+                    rotor_L.setPivotMatrix(BABYLON.Matrix.Translation(-0.25, 0, 0));
+                    rotor_R.setPivotMatrix(BABYLON.Matrix.Translation(0.25, 0, 0));
+
+                    // Sets the drone as the rotor's parent mesh
+                    rotor_L_frame.parent = drone;
+                    rotor_L.parent = drone;
+
+                    rotor_R_frame.parent = drone;
+                    rotor_R.parent = drone;
+                    
+                    // Sets drone material to rotor sets
                     rotor_L.material = droneMaterial;
                     rotor_L_frame.material = droneMaterial;
+
                     rotor_R.material = droneMaterial;
                     rotor_R_frame.material = droneMaterial;
+
 
                     drone.ellipsoid = new BABYLON.Vector3(0.2,0.07,0.4);
                     drone.checkCollisions = true;
 
-                    // Sets keyboard controls to the drone
-                    controlObject(drone);
                     
-                    // Sets drone initial position
-                    drone.position = new BABYLON.Vector3(0, 2, 0);
-
                     // Sets camera as FreeCamera and sets it to the drone's position
                     camera = new BABYLON.FreeCamera("Camera",drone.position.clone(), scene);
-	                camera.attachControl(canvas, true);
-                    
+                    camera.attachControl(canvas, true);
                     camera.ellipsoid = new BABYLON.Vector3(0.2,0.07,0.4);
-
+                    
+                    
                     // Sets camera as the active camera
                     scene.activeCamera = camera;
 
-                    // Sets the camera to the drone's position every time the scene is rendered
+                    
                     scene.onBeforeRenderObservable.add(()=>{
+                        // Sets the camera to the drone's position every time the scene is rendered
                         camera.position = drone.position.clone();
                         let ray = camera.getForwardRay();
+                        camera.position = drone.position.clone().add(ray.direction.multiplyByFloats(-1.5,-3,-1.5));
 
                         drone.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
                         objectTransform.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
                         
                         // Rotates left rotor
-                        rotor_L.setPivotMatrix(BABYLON.Matrix.Translation(-0.25, 0, 0));
                         rotor_L.rotate(BABYLON.Axis.Y, Math.PI/4, BABYLON.Space.LOCAL);
 
                         // Rotates right rotor
-                        rotor_R.setPivotMatrix(BABYLON.Matrix.Translation(0.25, 0, 0));
                         rotor_R.rotate(BABYLON.Axis.Y, Math.PI/4, BABYLON.Space.LOCAL);
-
-                        
-                        camera.position = drone.position.clone().add(ray.direction.multiplyByFloats(-1.5,-3,-1.5));
                     })
                 }); 
 
