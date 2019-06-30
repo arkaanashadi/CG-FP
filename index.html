@@ -28,8 +28,11 @@
             var canvas = document.getElementById("render");
             var engine = new BABYLON.Engine(canvas, true);
             var scene = new BABYLON.Scene(engine);
+            scene.collisionsEnabled = true;
+            scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
+            var objectTransform = new BABYLON.TransformNode("root"); 
             var map = ["asset/building/", "building.babylon"];
-            var camera;
+            var camera; 
             
             function controlObject(object) {
 
@@ -48,10 +51,10 @@
                         if (evt.sourceEvent.key == "d") {
                             object.__D_Pressed = true;
                         }
-                        if (evt.sourceEvent.key == "q") {
+                        if (evt.sourceEvent.keyCode === 16) {
                             object.__Q_Pressed = true;
                         }
-                        if (evt.sourceEvent.key == "e") {
+                        if (evt.sourceEvent.keyCode === 67) {
                             object.__E_Pressed = true;
                         }
                     }));
@@ -70,10 +73,10 @@
                         if (evt.sourceEvent.key == "d") {
                             object.__D_Pressed = false;
                         }
-                        if (evt.sourceEvent.key == "q") {
+                        if (evt.sourceEvent.keyCode === 16) {
                             object.__Q_Pressed = false;
                         }
-                        if (evt.sourceEvent.key == "e") {
+                        if (evt.sourceEvent.keyCode === 67) {
                             object.__E_Pressed = false;
                         }
                     }));
@@ -81,31 +84,48 @@
                 // Moves the object based on keyboard input
                     scene.registerBeforeRender(function(){
                         if(!scene.isReady()) return;
+                        
+                        var droneSpeed=0.08;
+                        var gravity=0;
+
+                        var x=droneSpeed*objectTransform.forward.x;
+                        var z=droneSpeed*objectTransform.forward.z;
+                        var sx=droneSpeed*objectTransform.right.x;
+                        var sz=droneSpeed*objectTransform.right.z;
+                        var hx=droneSpeed*objectTransform.up.x;
+                        var hy=droneSpeed*objectTransform.up.y;
+                        var hz=droneSpeed*objectTransform.up.z;
 
                         if(object){
                             if(object.__W_Pressed)
                                 {
-                                    object.translate(BABYLON.Axis.Z, 0.1, BABYLON.Space.LOCAL);
+                                    var forwards = new BABYLON.Vector3(x, gravity, z);
+                                    object.moveWithCollisions(forwards);
                                 }
                             if(object.__S_Pressed)
                                 {
-                                    object.translate(BABYLON.Axis.Z, -0.1, BABYLON.Space.LOCAL);
+                                    var backwards = new BABYLON.Vector3(-x, gravity, -z);
+                                    object.moveWithCollisions(backwards);
                                 }
                             if(object.__A_Pressed) 
                                 {
-                                    object.translate(BABYLON.Axis.X, -0.1, BABYLON.Space.LOCAL);
+                                    var left = new BABYLON.Vector3(-sx, gravity, -sz);
+                                    object.moveWithCollisions(left);
                                 }
                             if(object.__D_Pressed)
                                 {
-                                    object.translate(BABYLON.Axis.X, 0.1, BABYLON.Space.LOCAL);
+                                    var right = new BABYLON.Vector3(sx, gravity, sz);
+                                    object.moveWithCollisions(right);
                                 }
                             if(object.__Q_Pressed)
                                 {
-                                    object.translate(BABYLON.Axis.Y, 0.1, BABYLON.Space.LOCAL);
+                                    var upwards = new BABYLON.Vector3(hx, hy, hz);
+                                    object.moveWithCollisions(upwards);
                                 }
                             if(object.__E_Pressed)
                                 {
-                                    object.translate(BABYLON.Axis.Y, -0.1, BABYLON.Space.LOCAL);
+                                    var downwards = new BABYLON.Vector3(-hx, -hy, -hz);
+                                    object.moveWithCollisions(downwards);
                                 }
                         }
                     });
@@ -116,24 +136,38 @@
                 // Mark the test object (some how this is important??? (causes problems if page is reloaded without Mark))
                 var box = BABYLON.MeshBuilder.CreateBox("Mark", {size: 1}, scene);
 
+                var rotor1 = BABYLON.MeshBuilder.CreateBox("box", {height: 0.01, width:0.22, depth:.03}, scene);   
+                var rotor2 = BABYLON.MeshBuilder.CreateBox("box", {height: 0.01, width:0.22, depth:.03}, scene); 
+
                 // Loads Map
                 BABYLON.SceneLoader.ImportMesh("", "asset/building/", "building.babylon", scene, function(mapMesh) {
                     scene.meshes[0].scaling = new BABYLON.Vector3(0.001,0.001,0.001);
+                    scene.meshes[0].checkCollisions = true;
                 });
-
+                
                 // Loads Drone
                 BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_stl.stl", scene, function (droneMeshes) {
                     drone = droneMeshes[0];
+                    
+                    drone.ellipsoid = new BABYLON.Vector3(0.2,0.07,0.4);
+                    drone.checkCollisions = true;
 
                     // Sets keyboard controls to the drone
                     controlObject(drone);
                     
                     // Sets drone initial position
-                    drone.position = new BABYLON.Vector3(0, 10, -10);
+                    drone.position = new BABYLON.Vector3(0, 2, 0);
+
+                    rotor1.position.x += .25;
+                    rotor2.position.x -= .25;
+                    rotor1.parent = drone;  
+                    rotor2.parent = drone;
 
                     // Sets camera as FreeCamera and sets it to the drone's position
                     camera = new BABYLON.FreeCamera("Camera",drone.position.clone(), scene);
 	                camera.attachControl(canvas, true);
+                    
+                    camera.ellipsoid = new BABYLON.Vector3(0.2,0.07,0.4);
 
                     // Sets camera as the active camera
                     scene.activeCamera = camera;
@@ -144,8 +178,12 @@
                         let ray = camera.getForwardRay();
 
                         drone.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
+                        objectTransform.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
                         
-                        camera.position = drone.position.clone().add(ray.direction.multiplyByFloats(-1.5,-1.5,-1.5));
+                        rotor1.rotation.y += 2;
+                        rotor2.rotation.y -= 2;
+                        
+                        camera.position = drone.position.clone().add(ray.direction.multiplyByFloats(-1.5,-3,-1.5));
                     })
                 }); 
 
