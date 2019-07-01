@@ -31,119 +31,109 @@
             scene.collisionsEnabled = true;
             scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
             var objectTransform = new BABYLON.TransformNode("root"); 
-            var map = ["asset/building/", "building.babylon"];
+
+            var map = [["building/", "75-low-poly-buildings/", "city-babylon/"], ["building.babylon", "low poly buildings.obj", "city.babylon"]];
+            var selectedMap = 0;
             var camera; 
             
             function controlObject(object) {
 
                 // Checks for keyboard inputs (keyup)
-                    scene.actionManager = new BABYLON.ActionManager(scene);
-                    scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
-                        if (evt.sourceEvent.key == "w") {
-                            object.__W_Pressed = true;
-                        }
-                        if (evt.sourceEvent.key == "s") {
-                            object.__S_Pressed = true;
-                        }
-                        if (evt.sourceEvent.key == "a") {
-                            object.__A_Pressed = true;
-                        }
-                        if (evt.sourceEvent.key == "d") {
-                            object.__D_Pressed = true;
-                        }
-                        if (evt.sourceEvent.keyCode === 16) {
-                            object.__Q_Pressed = true;
-                        }
-                        if (evt.sourceEvent.keyCode === 67) {
-                            object.__E_Pressed = true;
-                        }
-                    }));
+                scene.actionManager = new BABYLON.ActionManager(scene);
+                scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
+                    if (evt.sourceEvent.key == "w") {
+                        object.__W_Pressed = true;
+                    }
+                    if (evt.sourceEvent.key == "s") {
+                        object.__S_Pressed = true;
+                    }
+                    if (evt.sourceEvent.key == "a") {
+                        object.__A_Pressed = true;
+                    }
+                    if (evt.sourceEvent.key == "d") {
+                        object.__D_Pressed = true;
+                    }
+                    if (evt.sourceEvent.keyCode === 16) {
+                        object.__Q_Pressed = true;
+                    }
+                    if (evt.sourceEvent.keyCode === 67) {
+                        object.__E_Pressed = true;
+                    }
+                }));
 
-                    // Checks for keyboard inputs (keydown)
-                    scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, (evt) => {
-                        if (evt.sourceEvent.key == "w") {
-                            object.__W_Pressed = false;
-                        }
-                        if (evt.sourceEvent.key == "s") {
-                            object.__S_Pressed = false;
-                        }
-                        if (evt.sourceEvent.key == "a") {
-                            object.__A_Pressed = false;
-                        }
-                        if (evt.sourceEvent.key == "d") {
-                            object.__D_Pressed = false;
-                        }
-                        if (evt.sourceEvent.keyCode === 16) {
-                            object.__Q_Pressed = false;
-                        }
-                        if (evt.sourceEvent.keyCode === 67) {
-                            object.__E_Pressed = false;
-                        }
-                    }));
+                // Checks for keyboard inputs (keydown)
+                scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, (evt) => {
+                    if (evt.sourceEvent.key == "w") {
+                        object.__W_Pressed = false;
+                    }
+                    if (evt.sourceEvent.key == "s") {
+                        object.__S_Pressed = false;
+                    }
+                    if (evt.sourceEvent.key == "a") {
+                        object.__A_Pressed = false;
+                    }
+                    if (evt.sourceEvent.key == "d") {
+                        object.__D_Pressed = false;
+                    }
+                    if (evt.sourceEvent.keyCode === 16) {
+                        object.__Q_Pressed = false;
+                    }
+                    if (evt.sourceEvent.keyCode === 67) {
+                        object.__E_Pressed = false;
+                    }
+                }));
 
                 // Moves the object based on keyboard input
-                    scene.registerBeforeRender(function(){
-                        if(!scene.isReady()) return;
-                        
-                        var droneSpeed=0.08;
-                        var gravity=0;
+                scene.registerBeforeRender(function(){
+                    if(!scene.isReady()) return;
+                    
+                    var droneSpeed=0.08;
+                    var gravity=0;
 
-                        var x=droneSpeed*objectTransform.forward.x;
-                        var z=droneSpeed*objectTransform.forward.z;
-                        var sx=droneSpeed*objectTransform.right.x;
-                        var sz=droneSpeed*objectTransform.right.z;
-                        var hx=droneSpeed*objectTransform.up.x;
-                        var hy=droneSpeed*objectTransform.up.y;
-                        var hz=droneSpeed*objectTransform.up.z;
+                    var x=droneSpeed*objectTransform.forward.x;
+                    var z=droneSpeed*objectTransform.forward.z;
+                    var sx=droneSpeed*objectTransform.right.x;
+                    var sz=droneSpeed*objectTransform.right.z;
+                    var hx=droneSpeed*objectTransform.up.x;
+                    var hy=droneSpeed*objectTransform.up.y;
+                    var hz=droneSpeed*objectTransform.up.z;
 
-                        if(object){
-                            if(object.__W_Pressed)
-                                {
-                                    var forwards = new BABYLON.Vector3(x, gravity, z);
-                                    object.moveWithCollisions(forwards);
-                                }
-                            if(object.__S_Pressed)
-                                {
-                                    var backwards = new BABYLON.Vector3(-x, gravity, -z);
-                                    object.moveWithCollisions(backwards);
-                                }
-                            if(object.__A_Pressed) 
-                                {
-                                    var left = new BABYLON.Vector3(-sx, gravity, -sz);
-                                    object.moveWithCollisions(left);
-                                }
-                            if(object.__D_Pressed)
-                                {
-                                    var right = new BABYLON.Vector3(sx, gravity, sz);
-                                    object.moveWithCollisions(right);
-                                }
-                            if(object.__Q_Pressed)
-                                {
-                                    var upwards = new BABYLON.Vector3(hx, hy, hz);
-                                    object.moveWithCollisions(upwards);
-                                }
-                            if(object.__E_Pressed)
-                                {
-                                    var downwards = new BABYLON.Vector3(-hx, -hy, -hz);
-                                    object.moveWithCollisions(downwards);
-                                }
-                        }
-                    });
-                }
-
-            var createScene = function() {
-
-                // Mark the test object (some how this is important??? (causes problems if page is reloaded without Mark))
-                var box = BABYLON.MeshBuilder.CreateBox("Mark", {size: 1}, scene);
-
-                 
-
-                // Loads Map
-                BABYLON.SceneLoader.ImportMesh("", "asset/building/", "building.babylon", scene, function(mapMesh) {
-                    scene.meshes[0].scaling = new BABYLON.Vector3(0.001,0.001,0.001);
-                    scene.meshes[0].checkCollisions = true;
+                    if(object){
+                        if(object.__W_Pressed)
+                            {
+                                var forwards = new BABYLON.Vector3(x, gravity, z);
+                                object.moveWithCollisions(forwards);
+                            }
+                        if(object.__S_Pressed)
+                            {
+                                var backwards = new BABYLON.Vector3(-x, gravity, -z);
+                                object.moveWithCollisions(backwards);
+                            }
+                        if(object.__A_Pressed) 
+                            {
+                                var left = new BABYLON.Vector3(-sx, gravity, -sz);
+                                object.moveWithCollisions(left);
+                            }
+                        if(object.__D_Pressed)
+                            {
+                                var right = new BABYLON.Vector3(sx, gravity, sz);
+                                object.moveWithCollisions(right);
+                            }
+                        if(object.__Q_Pressed)
+                            {
+                                var upwards = new BABYLON.Vector3(hx, hy, hz);
+                                object.moveWithCollisions(upwards);
+                            }
+                        if(object.__E_Pressed)
+                            {
+                                var downwards = new BABYLON.Vector3(-hx, -hy, -hz);
+                                object.moveWithCollisions(downwards);
+                            }
+                    }
                 });
-                
+            }
+
+            function initializeDrone() {
                 // Loads Drone
                 BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_obj.obj", scene, function (droneMeshes) {
                     drone = droneMeshes[0];
@@ -214,12 +204,27 @@
                         objectTransform.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
                         
                         // Rotates left rotor
-                        rotor_L.rotate(BABYLON.Axis.Y, Math.PI/4, BABYLON.Space.LOCAL);
+                        rotor_L.rotate(BABYLON.Axis.Y, 2.4, BABYLON.Space.LOCAL);
 
                         // Rotates right rotor
-                        rotor_R.rotate(BABYLON.Axis.Y, Math.PI/4, BABYLON.Space.LOCAL);
+                        rotor_R.rotate(BABYLON.Axis.Y, 2.4, BABYLON.Space.LOCAL);
                     })
-                }); 
+                });
+            }
+
+            var createScene = function() {
+
+                // Loads Map
+                // console.log(scene.meshes);
+                BABYLON.SceneLoader.ImportMesh("", "asset/".concat(map[0][selectedMap]), map[1][selectedMap], scene, function(mapMesh) {
+                    for (var i = mapMesh.length - 1; i >= 0; i--) {
+                        mapMesh[i].scaling = new BABYLON.Vector3(1, 1, 1);
+                        mapMesh[i].checkCollisions = true;
+                    }
+                });
+
+                // Initialize drone to scene
+                initializeDrone();
 
                 scene.createDefaultCameraOrLight(true, true, true);
                 
