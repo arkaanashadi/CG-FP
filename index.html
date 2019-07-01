@@ -4,6 +4,7 @@
         <title>Computer Graphics Final Project</title>
         <script src="js/babylonjs/babylon.js"></script>
         <script src="js/babylonjs/babylonjs.loaders.min.js"></script>
+        <script src="js/babylonjs/babylon.gui.min.js"></script>
         <script src="js/babylonjs/babylon.objFileLoader.js"></script>
         <script src="js/jquery/pep.js"></script>
 
@@ -139,7 +140,7 @@
                     drone = droneMeshes[0];
 
                     // Sets drone initial position
-                    drone.position = new BABYLON.Vector3(0, 2, 0);
+                    drone.position = new BABYLON.Vector3(-2, 2, -3);
 
                     // Loads the drone Material
                     var droneMaterial = new BABYLON.StandardMaterial("droneMaterial", scene);
@@ -211,6 +212,62 @@
                     })
                 });
             }
+            
+            function GUI() {
+                var sphereMaterial = new BABYLON.StandardMaterial();
+
+                var sphere1 = BABYLON.Mesh.CreateSphere("How to: Use WASD to move,\nShift and C for up and down", 10.0, 9.0, scene);
+
+                sphere1.position.x = -2;
+                sphere1.position.y = 2;
+                sphere1.material = sphereMaterial;
+                sphere1.isVisible = false;
+
+                // var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("ui1");
+
+                var createLabel = function(mesh) {
+                var label = new BABYLON.GUI.Rectangle("label for " + mesh.name);
+                label.background = "black"
+                label.height = "70px";
+                label.alpha = 0.5;
+                label.width = "300px";
+                label.cornerRadius = 20;
+                label.thickness = 1;
+                label.linkOffsetY = 30;
+                label.isVisible = true;
+                var gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("myUI");
+                var button = BABYLON.GUI.Button.CreateSimpleButton("button", "Clicks: 0");
+                button.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                button.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                button.width = "150px";
+                button.height = "50px";
+                button.cornerRadius = 20;
+                button.thickness = 4;
+                button.children[0].color = "#DFF9FB";
+                button.children[0].fontSize = 24;
+                button.color = "#FF7979";
+                button.background = "#EB4D4B";
+
+                button.onPointerClickObservable.add(function () {
+                    if (label.isVisible == true){
+                        label.isVisible = false;
+                    }
+                    else
+                        label.isVisible = true;
+                });
+
+                gui.addControl(button);
+                advancedTexture.addControl(label); 
+                label.linkWithMesh(mesh);
+
+                var text1 = new BABYLON.GUI.TextBlock();
+                text1.text = mesh.name;
+                text1.color = "white";
+                label.addControl(text1);  
+            }
+
+            createLabel(sphere1);
+            }
 
             var createScene = function() {
 
@@ -225,6 +282,7 @@
 
                 // Initialize drone to scene
                 initializeDrone();
+                GUI();
 
                 scene.createDefaultCameraOrLight(true, true, true);
                 
