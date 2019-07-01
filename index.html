@@ -225,7 +225,7 @@
                 
             }
 
-            function GUI(advancedTexture, scene) {
+            function GUI(advancedTexture, scene, currentMapNumber) {
                 var sphereMaterial = new BABYLON.StandardMaterial();
 
                 var sphere1 = BABYLON.Mesh.CreateSphere("How to: Use WASD to move,\nShift and C for up and down", 10.0, 9.0, scene);
@@ -267,7 +267,7 @@
 
 
                 // Select City Button
-                var selectCity = BABYLON.GUI.Button.CreateSimpleButton("selectCity", "City");
+                var selectCity = BABYLON.GUI.Button.CreateSimpleButton("selectCity", "Switch");
                 selectCity.width = "150px";
                 selectCity.height = "50px";
                 selectCity.cornerRadius = 20;
@@ -282,7 +282,14 @@
                 selectCity.left = "160px";
 
                 selectCity.onPointerClickObservable.add(function() {
-                    switchScene(scene, 1);
+                    switch (currentMapNumber){
+                        case 0:
+                            switchScene(scene, 1);
+                            break;
+                        case 1:
+                            switchScene(scene, 0);
+                            break;
+                    }
                 });
 
                 advancedTexture.addControl(help);
@@ -316,7 +323,7 @@
 
                 // Initialize drone to scene
                 initializeDrone(sceneTA);
-                GUI(sceneTA_GUI, sceneTA);
+                GUI(sceneTA_GUI, sceneTA, 0);
 
                 sceneTA.createDefaultCameraOrLight(true, true, true);
                 
@@ -328,6 +335,7 @@
                 sceneCity.collisionsEnabled = true;
                 sceneCity.gravity = new BABYLON.Vector3(0, -9.81, 0);
                 objectTransform = new BABYLON.TransformNode("root", sceneCity);
+                sceneCity_GUI = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("City_GUI", sceneCity)
 
                 // Loads Map
                 BABYLON.SceneLoader.ImportMesh("", "asset/city-babylon/", "city.babylon", sceneCity, function(mapMesh) {
@@ -340,6 +348,7 @@
                 
                 // Initialize drone to scene
                 initializeDrone(sceneCity);
+                GUI(sceneCity_GUI, sceneCity, 1);
 
                 sceneCity.createDefaultCameraOrLight(true, true, true);
 
