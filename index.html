@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="UTF-8">
         <title>Computer Graphics Final Project</title>
         <script src="js/babylonjs/babylon.js"></script>
         <script src="js/babylonjs/babylonjs.loaders.min.js"></script>
@@ -28,17 +29,14 @@
         <script>        
             var canvas = document.getElementById("render");
             var engine = new BABYLON.Engine(canvas, true);
-            var scene = new BABYLON.Scene(engine);
-            var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("ui1");
-            scene.collisionsEnabled = true;
-            scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
-            var objectTransform = new BABYLON.TransformNode("root"); 
-
-            var map = [["building/", "75-low-poly-buildings/", "city-babylon/"], ["building.babylon", "low poly buildings.obj", "city.babylon"]];
-            var selectedMap = 0;
-            var camera; 
+            var advancedTexture;
+            var objectTransform;
+            var mapSelected = 0;
+            var camera;
+            var sceneTA;
+            var sceneCity;
             
-            function controlObject(object) {
+            function controlObject(object, scene) {
 
                 // Checks for keyboard inputs (keyup)
                 scene.actionManager = new BABYLON.ActionManager(scene);
@@ -86,7 +84,7 @@
                 }));
 
                 // Moves the object based on keyboard input
-                scene.registerBeforeRender(function(){
+                scene.registerBeforeRender(()=>{
                     if(!scene.isReady()) return;
                     
                     var droneSpeed=0.08;
@@ -135,13 +133,13 @@
                 });
             }
 
-            function initializeDrone() {
+            function initializeDrone(scene) {
                 // Loads Drone
                 BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_obj.obj", scene, function (droneMeshes) {
                     drone = droneMeshes[0];
-
+                    console.log(scene);
                     // Sets drone initial position
-                    drone.position = new BABYLON.Vector3(-2, 2, -3);
+                    drone.position = new BABYLON.Vector3(0, 2, 0);
 
                     // Loads the drone Material
                     var droneMaterial = new BABYLON.StandardMaterial("droneMaterial", scene);
@@ -151,7 +149,7 @@
                     drone.material = droneMaterial;
 
                     // Sets keyboard controls to the drone
-                    controlObject(drone);
+                    controlObject(drone, scene);
 
 
                     // Sets the rotor and rotor frames meshes
@@ -194,7 +192,6 @@
                     
                     // Sets camera as the active camera
                     scene.activeCamera = camera;
-
                     
                     scene.onBeforeRenderObservable.add(()=>{
                         // Sets the camera to the drone's position every time the scene is rendered
@@ -214,7 +211,21 @@
                 });
             }
             
-            function GUI() {
+            function switchScene(sceneFrom, mapNumber) {
+                mapSelected = mapNumber;
+                sceneFrom.dispose();
+                switch (mapNumber) {
+                    case 0:
+                        sceneTA = createSceneTA();
+                        break;
+                    case 1:
+                        sceneCity = createSceneCity();
+                        break;
+                }
+                
+            }
+
+            function GUI(advancedTexture, scene) {
                 var sphereMaterial = new BABYLON.StandardMaterial();
 
                 var sphere1 = BABYLON.Mesh.CreateSphere("How to: Use WASD to move,\nShift and C for up and down", 10.0, 9.0, scene);
@@ -223,8 +234,6 @@
                 sphere1.position.y = 2;
                 sphere1.material = sphereMaterial;
                 sphere1.isVisible = false;
-
-                // var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("ui1");
 
                 var createLabel = function(mesh) {
                 var label = new BABYLON.GUI.Rectangle("label for " + mesh.name);
@@ -236,20 +245,19 @@
                 label.thickness = 1;
                 label.linkOffsetY = 30;
                 label.isVisible = true;
-                var gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("myUI");
-                var button = BABYLON.GUI.Button.CreateSimpleButton("button", "Help");
-                button.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-                button.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-                button.width = "150px";
-                button.height = "50px";
-                button.cornerRadius = 20;
-                button.thickness = 4;
-                button.children[0].color = "#DFF9FB";
-                button.children[0].fontSize = 24;
-                button.color = "#FF7979";
-                button.background = "#EB4D4B";
+                var help = BABYLON.GUI.Button.CreateSimpleButton("help", "Help");
+                help.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                help.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                help.width = "150px";
+                help.height = "50px";
+                help.cornerRadius = 20;
+                help.thickness = 4;
+                help.children[0].color = "#DFF9FB";
+                help.children[0].fontSize = 24;
+                help.color = "#FF7979";
+                help.background = "#EB4D4B";
 
-                button.onPointerClickObservable.add(function () {
+                help.onPointerClickObservable.add(function () {
                     if (label.isVisible == true){
                         label.isVisible = false;
                     }
@@ -257,7 +265,28 @@
                         label.isVisible = true;
                 });
 
-                gui.addControl(button);
+
+                // Select City Button
+                var selectCity = BABYLON.GUI.Button.CreateSimpleButton("selectCity", "City");
+                selectCity.width = "150px";
+                selectCity.height = "50px";
+                selectCity.cornerRadius = 20;
+                selectCity.thickness = 4;
+                selectCity.children[0].color = "#DFF9FB";
+                selectCity.children[0].fontSize = 24;
+                selectCity.background = "grey";
+                selectCity.color = "#FF7979";
+                selectCity.background = "#EB4D4B";
+                selectCity.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                selectCity.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                selectCity.left = "160px";
+
+                selectCity.onPointerClickObservable.add(function() {
+                    switchScene(scene, 1);
+                });
+
+                advancedTexture.addControl(help);
+                advancedTexture.addControl(selectCity);
                 advancedTexture.addControl(label); 
                 label.linkWithMesh(mesh);
 
@@ -270,11 +299,15 @@
             createLabel(sphere1);
             }
 
-            var createScene = function() {
+            var createSceneTA = function() {
+                var sceneTA = new BABYLON.Scene(engine);
+                sceneTA.collisionsEnabled = true;
+                sceneTA.gravity = new BABYLON.Vector3(0, -9.81, 0);
+                objectTransform = new BABYLON.TransformNode("root", sceneTA);
+                sceneTA_GUI = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("TA_GUI", sceneTA)
 
                 // Loads Map
-                // console.log(scene.meshes);
-                BABYLON.SceneLoader.ImportMesh("", "asset/".concat(map[0][selectedMap]), map[1][selectedMap], scene, function(mapMesh) {
+                BABYLON.SceneLoader.ImportMesh("", "asset/building/", "building.babylon", sceneTA, function(mapMesh) {
                     for (var i = mapMesh.length - 1; i >= 0; i--) {
                         mapMesh[i].scaling = new BABYLON.Vector3(1, 1, 1);
                         mapMesh[i].checkCollisions = true;
@@ -282,18 +315,57 @@
                 });
 
                 // Initialize drone to scene
-                initializeDrone();
-                GUI();
+                initializeDrone(sceneTA);
+                GUI(sceneTA_GUI, sceneTA);
 
-                scene.createDefaultCameraOrLight(true, true, true);
+                sceneTA.createDefaultCameraOrLight(true, true, true);
                 
-                return scene;
+                return sceneTA;
             }
             
-            var scene = createScene();
+            var createSceneCity = function() {
+                var sceneCity = new BABYLON.Scene(engine);
+                sceneCity.collisionsEnabled = true;
+                sceneCity.gravity = new BABYLON.Vector3(0, -9.81, 0);
+                objectTransform = new BABYLON.TransformNode("root", sceneCity);
+
+                // Loads Map
+                BABYLON.SceneLoader.ImportMesh("", "asset/city-babylon/", "city.babylon", sceneCity, function(mapMesh) {
+                    for (var i = mapMesh.length - 1; i >= 0; i--) {
+                        mapMesh[i].scaling = new BABYLON.Vector3(1, 1, 1);
+                        mapMesh[i].checkCollisions = true;
+                    }
+                });
+
+                
+                // Initialize drone to scene
+                initializeDrone(sceneCity);
+
+                sceneCity.createDefaultCameraOrLight(true, true, true);
+
+                return sceneCity;
+            }
+            sceneTA = createSceneTA();
+
+            // var selectCity = BABYLON.GUI.Button.CreateSimpleButton("selectCity", "City");
+            // selectCity.width = "150px";
+            // selectCity.height = "50px";
+            // selectCity.background = "grey";
+            // selectCity.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+            // selectCity.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            // advancedTexture.addControl(selectCity);
 
             engine.runRenderLoop(function() {
-                scene.render();
+                switch (mapSelected) {
+                    case 0:                    
+                        sceneTA.render();
+                        console.log(0);
+                    break
+                    case 1:
+                        sceneCity.render();
+                        console.log(1);
+                    break
+                }
             });
 
             window.addEventListener("resize", function() {
