@@ -29,6 +29,7 @@
             var canvas = document.getElementById("render");
             var engine = new BABYLON.Engine(canvas, true);
             var scene = new BABYLON.Scene(engine);
+            var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("ui1");
             scene.collisionsEnabled = true;
             scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
             var objectTransform = new BABYLON.TransformNode("root"); 
