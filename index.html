@@ -32,7 +32,11 @@
             var advancedTexture;
             var objectTransform;
             var mapSelected = 0;
+            var drone;
             var camera;
+            var camera2;
+            var view = 1;
+            var musicOn = false;
             var sceneTA;
             var sceneCity;
             
@@ -134,6 +138,12 @@
             }
 
             function initializeDrone(scene) {
+                // Initializes drone audio
+                var droneSound = new BABYLON.Sound("droneSound", "asset/Drone-Design/drone.wav", scene, null, {
+                loop: true, autoplay: true, spatialSound: true,
+                distanceModel: "exponential", rolloffFactor: 0.2
+                });
+
                 // Loads Drone
                 BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_obj.obj", scene, function (droneMeshes) {
                     drone = droneMeshes[0];
@@ -183,10 +193,15 @@
                     drone.checkCollisions = true;
 
                     
-                    // Sets camera as FreeCamera and sets it to the drone's position
+                    // Sets camera as FreeCamera and sets it to the drone's position (third person)
                     camera = new BABYLON.FreeCamera("Camera",drone.position.clone(), scene);
                     camera.attachControl(canvas, true);
                     camera.ellipsoid = new BABYLON.Vector3(0.2,0.07,0.4);
+
+                    // Sets camera as FreeCamera and sets it to the drone's position (first person)
+                    camera2 = new BABYLON.FreeCamera("Camera2",drone.position.clone(), scene);
+                    camera2.attachControl(canvas, true);
+                    camera2.ellipsoid = new BABYLON.Vector3(0.2,0.1,0.4);
                     
                     
                     // Sets camera as the active camera
@@ -194,13 +209,23 @@
                     
                     scene.onBeforeRenderObservable.add(()=>{
                         // Sets the camera to the drone's position every time the scene is rendered
-                        camera.position = drone.position.clone();
-                        let ray = camera.getForwardRay();
-                        camera.position = drone.position.clone().add(ray.direction.multiplyByFloats(-1.5,-3,-1.5));
+                        if (scene.activeCamera.name == "Camera") {
+                            // third person
+                            let ray = camera.getForwardRay();
+                            camera.position = drone.position.clone().add(ray.direction.multiplyByFloats(-1.5,-3,-1.5));
 
-                        drone.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
-                        objectTransform.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
-                        
+                            drone.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
+                            objectTransform.rotation.y = Math.atan2(ray.direction.x,ray.direction.z);
+                        } else {
+                            // first person
+                            let ray2 = camera2.getForwardRay();
+                            camera2.position = drone.position.clone();
+
+                            drone.rotation.y = Math.atan2(ray2.direction.x, ray2.direction.z);
+                            objectTransform.rotation.y = Math.atan2(ray2.direction.x, ray2.direction.z);
+                        }
+
+                        // droneSound.setPosition(drone.position);
                         // Rotates left rotor
                         rotor_L.rotate(BABYLON.Axis.Y, 2.4, BABYLON.Space.LOCAL);
 
@@ -268,15 +293,41 @@
                     music.children[0].fontSize = 24;
                     music.color = "#FF7979";
                     music.background = "#EB4D4B";
-                    music.left = "320px";
+                    music.left = "480px";
+                    
                     music.onPointerClickObservable.add(function () {
-                        var music = new BABYLON.Sound("music", "asset/French Accordion - Traditionell Musette.ogg", scene, null, {
-                        loop: true, autoplay: true, spatialSound: true,
-                        distanceModel: "exponential", rolloffFactor: 0.2
-                        });
-                        music.setPosition(new BABYLON.Vector3(11.5, 20, -13.5));
+                        musicFile = new BABYLON.Sound("music", "asset/French Accordion - Traditionell Musette.ogg", scene, null, { loop: true, autoplay: true, spatialSound: true, distanceModel: "exponential", rolloffFactor: 0.2 });
+                        musicFile.setPosition(new BABYLON.Vector3(11.5, 20, -13.5));
                     });
                 }
+
+                var changeView = BABYLON.GUI.Button.CreateSimpleButton("changeView", "Change View");
+                changeView.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                changeView.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                changeView.width = "150px";
+                changeView.height = "50px";
+                changeView.cornerRadius = 20;
+                changeView.thickness = 4;
+                changeView.children[0].color = "#DFF9FB";
+                changeView.children[0].fontSize = 24;
+                changeView.color = "#FF7979";
+                changeView.background = "#EB4D4B";
+                changeView.left = "320px";
+
+                changeView.onPointerClickObservable.add(function () {
+                    switch (view) {
+                        case 1:
+                            scene.activeCamera = camera2;
+                            view = 3;
+                            break;
+
+                        case 3:
+                            scene.activeCamera = camera;
+                            view = 1;
+                            break;
+                    }
+                });
+
                 help.onPointerClickObservable.add(function () {
                     if (label.isVisible == true){
                         label.isVisible = false;
@@ -313,6 +364,7 @@
 
                 advancedTexture.addControl(help);
                 advancedTexture.addControl(selectCity);
+                advancedTexture.addControl(changeView);
                 advancedTexture.addControl(music);
                 advancedTexture.addControl(label); 
                 label.linkWithMesh(mesh);
