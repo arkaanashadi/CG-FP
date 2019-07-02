@@ -226,7 +226,7 @@
 
             function GUI(advancedTexture, scene, currentMapNumber) {
                 var sphereMaterial = new BABYLON.StandardMaterial();
-
+                
                 var sphere1 = BABYLON.Mesh.CreateSphere("How to: Use WASD to move,\nShift and C for up and down", 10.0, 9.0, scene);
 
                 sphere1.position.x = -2;
@@ -244,6 +244,7 @@
                 label.thickness = 1;
                 label.linkOffsetY = 30;
                 label.isVisible = true;
+
                 var help = BABYLON.GUI.Button.CreateSimpleButton("help", "Help");
                 help.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
                 help.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
@@ -255,7 +256,27 @@
                 help.children[0].fontSize = 24;
                 help.color = "#FF7979";
                 help.background = "#EB4D4B";
-
+                if (advancedTexture.name == "City_GUI") {
+                    var music = BABYLON.GUI.Button.CreateSimpleButton("music", "Music");
+                    music.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                    music.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                    music.width = "150px";
+                    music.height = "50px";
+                    music.cornerRadius = 20;
+                    music.thickness = 4;
+                    music.children[0].color = "#DFF9FB";
+                    music.children[0].fontSize = 24;
+                    music.color = "#FF7979";
+                    music.background = "#EB4D4B";
+                    music.left = "320px";
+                    music.onPointerClickObservable.add(function () {
+                        var music = new BABYLON.Sound("music", "asset/French Accordion - Traditionell Musette.ogg", scene, null, {
+                        loop: true, autoplay: true, spatialSound: true,
+                        distanceModel: "exponential", rolloffFactor: 0.2
+                        });
+                        music.setPosition(new BABYLON.Vector3(11.5, 20, -13.5));
+                    });
+                }
                 help.onPointerClickObservable.add(function () {
                     if (label.isVisible == true){
                         label.isVisible = false;
@@ -292,6 +313,7 @@
 
                 advancedTexture.addControl(help);
                 advancedTexture.addControl(selectCity);
+                advancedTexture.addControl(music);
                 advancedTexture.addControl(label); 
                 label.linkWithMesh(mesh);
 
@@ -302,6 +324,10 @@
             }
 
             createLabel(sphere1);
+            }
+
+            function music(scene) {
+                
             }
 
             var createSceneTA = function() {
@@ -349,15 +375,17 @@
                         eiffelTower[i].scaling = new BABYLON.Vector3(0.2, 0.2, 0.2);
                         eiffelTower[i].checkCollisions = true;
                         eiffelTower[i].position = new BABYLON.Vector3(11.5, 12, -13.5);
-                        // eiffelTower[i].material = eiffelTexture;
-                        // console.log(eiffelTower[i].material);
                     }
                     var eiffelTexture = new BABYLON.StandardMaterial("eiffel", sceneCity);
-                    eiffelTexture.diffusiveTexture = new BABYLON.Texture("asset/Eiffel/eiffel_texture.jpg", sceneCity);
-                    eiffelTexture.diffusiveTexture.uScale = 1;
-                    eiffelTexture.diffusiveTexture.vScale = 1;
+                    eiffelTexture.diffuseTexture = new BABYLON.Texture("asset/Eiffel/eiffel_texture.jpg", sceneCity);
+                    eiffelTexture.diffuseTexture.uScale = 0.1;
+                    eiffelTexture.diffuseTexture.vScale = 0.1;
                     eiffelTower[0].material = eiffelTexture;
+
+                    // invasion(sceneCity);
                 });
+                
+
                 
                 // Initialize drone to scene
                 initializeDrone(sceneCity);
