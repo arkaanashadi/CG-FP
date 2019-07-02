@@ -353,9 +353,9 @@
                         // console.log(eiffelTower[i].material);
                     }
                     var eiffelTexture = new BABYLON.StandardMaterial("eiffel", sceneCity);
-                    eiffelTexture.emissiveTexture = new BABYLON.Texture("asset/Eiffel/eiffel_texture.jpg", sceneCity);
-                    eiffelTexture.emissiveTexture.uScale = 1;
-                    eiffelTexture.emissiveTexture.vScale = 1;
+                    eiffelTexture.diffusiveTexture = new BABYLON.Texture("asset/Eiffel/eiffel_texture.jpg", sceneCity);
+                    eiffelTexture.diffusiveTexture.uScale = 1;
+                    eiffelTexture.diffusiveTexture.vScale = 1;
                     eiffelTower[0].material = eiffelTexture;
                 });
                 
