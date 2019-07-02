@@ -41,16 +41,16 @@
                 // Checks for keyboard inputs (keyup)
                 scene.actionManager = new BABYLON.ActionManager(scene);
                 scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
-                    if (evt.sourceEvent.key == "w") {
+                    if (evt.sourceEvent.keyCode === 87) {
                         object.__W_Pressed = true;
                     }
-                    if (evt.sourceEvent.key == "s") {
+                    if (evt.sourceEvent.keyCode === 83) {
                         object.__S_Pressed = true;
                     }
-                    if (evt.sourceEvent.key == "a") {
+                    if (evt.sourceEvent.keyCode === 65) {
                         object.__A_Pressed = true;
                     }
-                    if (evt.sourceEvent.key == "d") {
+                    if (evt.sourceEvent.keyCode === 68) {
                         object.__D_Pressed = true;
                     }
                     if (evt.sourceEvent.keyCode === 16) {
@@ -63,16 +63,16 @@
 
                 // Checks for keyboard inputs (keydown)
                 scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, (evt) => {
-                    if (evt.sourceEvent.key == "w") {
+                    if (evt.sourceEvent.keyCode === 87) {
                         object.__W_Pressed = false;
                     }
-                    if (evt.sourceEvent.key == "s") {
+                    if (evt.sourceEvent.keyCode === 83) {
                         object.__S_Pressed = false;
                     }
-                    if (evt.sourceEvent.key == "a") {
+                    if (evt.sourceEvent.keyCode === 65) {
                         object.__A_Pressed = false;
                     }
-                    if (evt.sourceEvent.key == "d") {
+                    if (evt.sourceEvent.keyCode === 68) {
                         object.__D_Pressed = false;
                     }
                     if (evt.sourceEvent.keyCode === 16) {
@@ -137,20 +137,19 @@
                 // Loads Drone
                 BABYLON.SceneLoader.ImportMesh("", "asset/Drone-Design/", "Drone_obj.obj", scene, function (droneMeshes) {
                     drone = droneMeshes[0];
-                    console.log(scene);
+                    
                     // Sets drone initial position
                     drone.position = new BABYLON.Vector3(0, 2, 0);
 
                     // Loads the drone Material
                     var droneMaterial = new BABYLON.StandardMaterial("droneMaterial", scene);
-                    droneMaterial.emissiveTexture = new BABYLON.Texture("asset/Drone-Design/textures/Flying drone_col.jpg", scene);
+                    droneMaterial.diffuseTexture = new BABYLON.Texture("asset/Drone-Design/textures/Flying drone_col.jpg", scene);
 
                     // Sets the drone material to the drone mesh
                     drone.material = droneMaterial;
 
                     // Sets keyboard controls to the drone
                     controlObject(drone, scene);
-
 
                     // Sets the rotor and rotor frames meshes
                     // Left rotor set
@@ -180,7 +179,7 @@
                     rotor_R_frame.material = droneMaterial;
 
 
-                    drone.ellipsoid = new BABYLON.Vector3(0.2,0.07,0.4);
+                    drone.ellipsoid = new BABYLON.Vector3(0.23,0.07,0.28);
                     drone.checkCollisions = true;
 
                     
@@ -265,7 +264,6 @@
                         label.isVisible = true;
                 });
 
-
                 // Select City Button
                 var selectCity = BABYLON.GUI.Button.CreateSimpleButton("selectCity", "Switch");
                 selectCity.width = "150px";
@@ -336,7 +334,7 @@
                 sceneCity.gravity = new BABYLON.Vector3(0, -9.81, 0);
                 objectTransform = new BABYLON.TransformNode("root", sceneCity);
                 sceneCity_GUI = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("City_GUI", sceneCity)
-
+                
                 // Loads Map
                 BABYLON.SceneLoader.ImportMesh("", "asset/city-babylon/", "city.babylon", sceneCity, function(mapMesh) {
                     for (var i = mapMesh.length - 1; i >= 0; i--) {
@@ -345,6 +343,21 @@
                     }
                 });
 
+                // Loads Eiffel tower
+                BABYLON.SceneLoader.ImportMesh("", "asset/Eiffel/", "eiffel-tower.babylon", sceneCity, function(eiffelTower) {
+                    for (var i = eiffelTower.length - 1; i >= 0; i--) {
+                        eiffelTower[i].scaling = new BABYLON.Vector3(0.2, 0.2, 0.2);
+                        eiffelTower[i].checkCollisions = true;
+                        eiffelTower[i].position = new BABYLON.Vector3(11.5, 12, -13.5);
+                        // eiffelTower[i].material = eiffelTexture;
+                        // console.log(eiffelTower[i].material);
+                    }
+                    var eiffelTexture = new BABYLON.StandardMaterial("eiffel", sceneCity);
+                    eiffelTexture.emissiveTexture = new BABYLON.Texture("asset/Eiffel/eiffel_texture.jpg", sceneCity);
+                    eiffelTexture.emissiveTexture.uScale = 1;
+                    eiffelTexture.emissiveTexture.vScale = 1;
+                    eiffelTower[0].material = eiffelTexture;
+                });
                 
                 // Initialize drone to scene
                 initializeDrone(sceneCity);
@@ -356,23 +369,13 @@
             }
             sceneTA = createSceneTA();
 
-            // var selectCity = BABYLON.GUI.Button.CreateSimpleButton("selectCity", "City");
-            // selectCity.width = "150px";
-            // selectCity.height = "50px";
-            // selectCity.background = "grey";
-            // selectCity.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-            // selectCity.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-            // advancedTexture.addControl(selectCity);
-
             engine.runRenderLoop(function() {
                 switch (mapSelected) {
                     case 0:                    
                         sceneTA.render();
-                        console.log(0);
                     break
                     case 1:
                         sceneCity.render();
-                        console.log(1);
                     break
                 }
             });
